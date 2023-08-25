@@ -4,6 +4,8 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation"
 import { cache } from "react";
+import AddToCartButton from "@/app/products/[id]/AddToCartButton";
+import { incrementProductQuantity } from "@/app/products/[id]/actions";
 
 interface ProductPageProps {
   params: {
@@ -12,13 +14,13 @@ interface ProductPageProps {
 }
 
 const getProduct = cache(async (id: string) => {
-  const product = await prisma.product.findUnique({ where: { id } })
+  const product = await prisma.product.findUnique({where: {id}})
   if (!product) notFound();
   return product;
 })
 
 export async function generateMetadata(
-  { params: { id } }: ProductPageProps
+  {params: {id}}: ProductPageProps
 ): Promise<Metadata> {
   const product = await getProduct(id)
 
@@ -35,7 +37,7 @@ export async function generateMetadata(
 }
 
 export default async function ProductPage(
-  { params: { id } }: ProductPageProps
+  {params: {id}}: ProductPageProps
 ) {
   const product = await getProduct(id)
 
@@ -51,8 +53,9 @@ export default async function ProductPage(
       />
       <div>
         <h1 className="text-5xl font-bold">{product.name}</h1>
-        <PriceTag price={product.price} className="mt-4" />
-        <p>{product.description}</p>
+        <PriceTag price={product.price} className="mt-4"/>
+        <p className="py-6">{product.description}</p>
+        <AddToCartButton productId={product.id} incrementProductQuantity={incrementProductQuantity}/>
       </div>
     </div>
   )
