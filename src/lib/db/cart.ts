@@ -1,15 +1,20 @@
 import { prisma } from "@/lib/db/prisma";
 import { cookies } from "next/headers";
-import { Cart, Prisma } from ".prisma/client";
+import { Prisma } from ".prisma/client";
 
 export type CartWithProduct = Prisma.CartGetPayload<{
-  include: {items: {include: {product: true}}}
+  include: { items: { include: { product: true } } }
+}>
+
+export type CartItemWithProduct = Prisma.CartItemGetPayload<{
+  include: { product: true }
 }>
 
 export type ShoppingCart = CartWithProduct & {
   size: number,
   subTotal: number
 }
+
 export async function getCart(): Promise<ShoppingCart | null> {
   const localCartId = cookies().get("localCartId")?.value
   const cart = localCartId ? await prisma.cart.findUnique({
