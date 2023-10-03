@@ -6,6 +6,7 @@ import { Adapter } from "next-auth/adapters";
 import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { env } from "@/lib/env";
+import { mergeAnonymousCart } from "@/lib/db/cart";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
@@ -15,6 +16,17 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GITHUB_SECRET,
     }),
   ],
+  callbacks: {
+    session({ session, user}) {
+      session.user.id = user.id
+      return session
+    }
+  },
+  events: {
+    async signIn({ user }) {
+      await mergeAnonymousCart(user.id);
+    }
+  }
 }
 
 const handler = NextAuth(authOptions);
